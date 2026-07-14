@@ -1,5 +1,4 @@
-import dbConnect from "@/lib/mongodb";
-import { UserModel } from "@/schemas/UserSchema";
+import User from "@/models/User"
 import { NextResponse } from "next/server";
 import bcrypt from 'bcrypt';
 
@@ -9,27 +8,23 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { email, password } = body;
 
-        if (!email || !password) {
-            return NextResponse.json(
-                { error: 'Email and password are required.' },
-                { status: 400 }
-            );
-        }
+        const user = User.login({
+            email,
+            password
+        })
 
-        await dbConnect();
+        return NextResponse.json({
+            message: "Login Successfull"
+        }, {
+            status: 201
+        })
 
-        const user = await UserModel.findOne({ email });
-
-        if (!user) {
-            return NextResponse.json(
-                { error: 'User not found.' },
-                { status: 404 }
-            );
-        }
-
-        const isPasswordValid = bcrypt.compare(password, user.);
 
     } catch (error) {
-
+        return NextResponse.json({
+            error: error instanceof Error ? error.message : "Internal Server Error!"
+        }, {
+            status: 400
+        })
     }
 }
