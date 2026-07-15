@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import { SignUpUserSchema, LoginUserSchema, UserSchema } from "@/schemas/UserSchema"
 import { db } from "@/services/database.service"
 import bcrypt from 'bcrypt';
+import { generateToken } from "@/lib/jwt";
 
 
 export default class User {
@@ -57,6 +58,7 @@ export default class User {
     if (!isPasswordValid) {
       throw new Error("Invalid email or password");
     }
+
 
     // Remove password before returning
     const { password, ...userWithoutPassword } = existingUser;

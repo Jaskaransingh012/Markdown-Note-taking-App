@@ -1,6 +1,7 @@
 "use client";
+import "./markdown.css";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Panel,
   Group,
@@ -47,12 +48,20 @@ function hello() {
 | Alex | 30 |
 
 `);
+const [html, setHtml] = useState("");
+
+useEffect(()=>{
+  const html = marked.parse(markdown) as string;
+  console.log(html);
+  setHtml(html);
+
+},[markdown])
 
   return (
     <Group className="h-screen">
       {/* LEFT */}
       <Panel defaultSize={50} minSize={20}>
-        <div className="h-full flex flex-col bg-zinc-950 h-screen">
+        <div className="h-screen overflow-y-auto flex flex-col bg-zinc-950">
           <div className="border-b border-zinc-800 px-4 py-3 font-semibold text-white">
             Markdown
           </div>
@@ -82,7 +91,7 @@ function hello() {
 
       {/* RIGHT */}
       <Panel defaultSize={50} minSize={20}>
-        <div className="h-full flex flex-col bg-white">
+        <div className="h-screen overflow-y-auto flex flex-col bg-white">
           <div className="border-b border-zinc-800 px-4 py-3 font-semibold text-black">
             HTML Preview
           </div>
@@ -95,9 +104,10 @@ function hello() {
               prose
               prose-invert
               max-w-none
+              markdown
             "
             dangerouslySetInnerHTML={{
-              __html: marked.parse(markdown) as string,
+              __html: html,
             }}
           />
         </div>
