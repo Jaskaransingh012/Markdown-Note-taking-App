@@ -1,68 +1,73 @@
 import { ObjectId } from "mongodb";
-import { SignUpUserSchema, LoginUserSchema, UserSchema } from "@/schemas/UserSchema"
-import { db } from "@/services/database.service"
-import bcrypt from 'bcrypt';
+import { SignUpUserSchema, LoginUserSchema, UserSchema } from "@/schemas/UserSchema";
+import { db } from "@/services/database.service";
+import bcrypt from "bcrypt";
 import { generateToken } from "@/lib/jwt";
 
-
 export default class User {
-  private static collection = db.collection<UserSchema>("users");
-  private static saltRounds = 10;
+    private static collection = db.collection<UserSchema>("users");
+    private static saltRounds = 10;
 
-  static async signup(user: SignUpUserSchema) {
-    // Check if user already exists
-    const existingUser = await this.collection.findOne({
-      email: user.email,
-    });
+    static async signup(user: SignUpUserSchema) {
+        // Check if user already exists
+        const existingUser = await this.collection.findOne({
+            email: user.email,
+        });
 
-    if (existingUser) {
-      throw new Error("User already exists");
+        if (existingUser) {
+            throw new Error("User already exists");
+        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(user.password, this.saltRounds);
+
+        const newUser: SignUpUserSchema = {
+            name: user.name,
+            email: user.email,
+            password: hashedPassword,
+        };
+
+        const result = await this.collection.insertOne(newUser);
+
+        return {
+            _id: result.insertedId,
+            ...newUser,
+        };
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(
-      user.password,
-      this.saltRounds
-    );
+    static async login(user: LoginUserSchema) {
+        // Find user by email
+        const existingUser = await this.collection.findOne({
+            email: user.email,
+        });
 
-    const newUser: SignUpUserSchema = {
-      name: user.name,
-      email: user.email,
-      password: hashedPassword,
-    };
+        if (!existingUser) {
+            throw new Error("Invalid email or password");
+        }
 
-    const result = await this.collection.insertOne(newUser);
+        // Compare passwords
+        const isPasswordValid = await bcrypt.compare(user.password, existingUser.password);
 
-    return {
-      _id: result.insertedId,
-      ...newUser,
-    };
-  }
+        if (!isPasswordValid) {
+            throw new Error("Invalid email or password");
+        }
 
-  static async login(user: LoginUserSchema) {
-    // Find user by email
-    const existingUser = await this.collection.findOne({
-      email: user.email,
-    });
+        // Remove password before returning
+        const { password, ...userWithoutPassword } = existingUser;
 
-    if (!existingUser) {
-      throw new Error("Invalid email or password");
+        return userWithoutPassword;
     }
 
-    // Compare passwords
-    const isPasswordValid = await bcrypt.compare(
-      user.password,
-      existingUser.password
-    );
+    static async me(id: string) {
+        const existingUser = await this.collection.findOne({
+            _id: new ObjectId(id),
+        });
 
-    if (!isPasswordValid) {
-      throw new Error("Invalid email or password");
+
+        if (!existingUser) throw new Error("User not Found");
+
+        const { password, ...userWithoutPassword } = existingUser;
+
+        return userWithoutPassword;
     }
-
-
-    // Remove password before returning
-    const { password, ...userWithoutPassword } = existingUser;
-
-    return userWithoutPassword;
-  }
 }

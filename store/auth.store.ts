@@ -1,9 +1,9 @@
 import authApi from "@/lib/axios";
-import User from "@/models/User";
+import { UserSchema } from "@/schemas/UserSchema";
 import { create } from "zustand";
 
 interface AuthState {
-    user: User | null;
+    user: UserSchema | null;
     loading: boolean;
     isAuthenticated: boolean;
 
@@ -21,10 +21,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     login: async (email, password) => {
         set({ loading: true });
 
+        console.log(email, password);
+
         const { data } = await authApi.post("/login", {
             email,
             password,
         });
+
+        console.log("data", data);
 
         set({
             user: data.user,
@@ -45,6 +49,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     fetchUser: async () => {
         try {
             const { data } = await authApi.get("/me");
+
+            console.log("data", data);
 
             set({
                 user: data.user,

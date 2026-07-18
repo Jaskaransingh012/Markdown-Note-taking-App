@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "./ui/Sidebar";
 import {
   IconArrowLeft,
@@ -9,8 +9,11 @@ import {
 } from "@tabler/icons-react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth.store";
 
 export function SidebarDemo() {
+
+  const { user} = useAuthStore();
   const links = [
     {
       label: "Dashboard",
@@ -41,6 +44,8 @@ export function SidebarDemo() {
       ),
     },
   ];
+
+
   const [open, setOpen] = useState(false);
   return (
 
@@ -59,7 +64,7 @@ export function SidebarDemo() {
           <div>
             <SidebarLink
               link={{
-                label: "Manu Arora",
+                label: `${user?.name}`,
                 href: "#",
                 icon: (
                   <img

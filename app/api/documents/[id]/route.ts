@@ -8,8 +8,13 @@ export async function GET(
   try {
     const { id } = await params;
 
-    const body = await req.json();
-    const { userId } = body;
+     const { searchParams } = new URL(req.url);
+
+    const userId = searchParams.get("userId");
+    if(!userId){
+      throw new Error ("User id is required");
+    }
+
 
     const document = await DocumentModel.getDocumentById(id, userId);
 

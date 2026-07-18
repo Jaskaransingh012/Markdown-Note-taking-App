@@ -6,3 +6,11 @@ const authApi = axios.create({
 })
 
 export default authApi;
+
+
+export const documentApi = axios.create({
+    baseURL: "/api/documents",
+    withCredentials: true,
+})
+
+

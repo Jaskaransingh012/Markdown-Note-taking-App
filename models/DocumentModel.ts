@@ -62,4 +62,18 @@ export default class DocumentModel {
 
         return result;
     }
+
+    static async getDocuments(userId: string){
+
+        console.log("This function");
+
+        const result = await this.collection.find({
+            authorId: new ObjectId(userId),
+        }).toArray();
+
+        console.log(result);
+
+
+        return result;
+    }
 }
